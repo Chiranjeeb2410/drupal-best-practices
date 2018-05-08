@@ -16,15 +16,17 @@ env:
 before_install:
   - cp .env.travis .env
   - sudo apt-get update -qq
+  - sudo apt-get install ruby-dev
   - pip install ansible
   - sudo rm /usr/local/bin/docker-compose
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
+  - gem install docker-sync
   - sudo apt-get install sshpass
 
 install:
-  - ansible-playbook ansible/drupal.travis.prod.yml --connection=local -i ansible/inventories/develop
+  - ansible-playbook ansible/drupal.travis.prod.yml --connection=local -i ansible/inventories/travis
 
 script:
   - if [ $BUILD_CHECK_PHPCS == true ]; then docker exec -it drupal vendor/bin/phpcbf --standard=Drupal -p ./web/themes/contrib ./web/modules/contrib; docker exec -it drupal vendor/bin/phpcs --standard=Drupal -p ./web/themes/contrib ./web/modules/contrib; fi;
